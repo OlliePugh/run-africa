@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/run-africa/static/css/main.43aabb2f.css",
+    "main.js": "/run-africa/static/js/main.928176a0.js",
+    "static/js/787.dc889320.chunk.js": "/run-africa/static/js/787.dc889320.chunk.js",
+    "index.html": "/run-africa/index.html",
+    "main.43aabb2f.css.map": "/run-africa/static/css/main.43aabb2f.css.map",
+    "main.928176a0.js.map": "/run-africa/static/js/main.928176a0.js.map",
+    "787.dc889320.chunk.js.map": "/run-africa/static/js/787.dc889320.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.43aabb2f.css",
+    "static/js/main.928176a0.js"
+  ]
+}
