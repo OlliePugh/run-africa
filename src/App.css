@@ -24,6 +24,10 @@
   color: white;
 }
 
+.full-height-map {
+  height: 100vh;
+}
+
 .App-link {
   color: #61dafb;
 }
