@@ -1,11 +1,14 @@
 import "./App.css";
 import "leaflet/dist/leaflet.css";
-import L from "leaflet";
+import L, { LatLngTuple } from "leaflet";
 import { MapContainer, TileLayer } from "react-leaflet";
 import data from "./all_runs.json";
 import Run, { RunData } from "./molecules/run";
 import { useState } from "react";
 import InfoPanel from "./molecules/info_panel";
+
+// @ts-ignore
+const sortedData = data.sort((a, b) => b.date - a.date);
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
@@ -21,8 +24,8 @@ function App() {
       <InfoPanel run={openMarker} onClose={() => setOpenMarker(undefined)} />
       <MapContainer
         className="full-height-map z-10"
-        center={[10, 30]}
-        zoom={3}
+        center={sortedData[0].path[0][0] as LatLngTuple}
+        zoom={8}
         minZoom={3}
         maxZoom={18}
         maxBounds={[
