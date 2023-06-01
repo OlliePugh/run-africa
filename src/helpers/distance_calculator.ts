@@ -11,13 +11,12 @@ export const calculateTotalDistance = (runs: RunData[]) => {
     let distance = 0;
 
     // Iterate over each set of latitude-longitude points in the path
-    path.forEach((coordinates) => {
-      for (let i = 1; i < coordinates.length; i++) {
-        const [lat1, lon1] = coordinates[i - 1];
-        const [lat2, lon2] = coordinates[i];
-        distance += calculateDistance(lat1, lon1, lat2, lon2);
-      }
-    });
+
+    for (let i = 1; i < path.length; i++) {
+      const [lat1, lon1] = path[i - 1];
+      const [lat2, lon2] = path[i];
+      distance += calculateDistance(lat1, lon1, lat2, lon2);
+    }
 
     totalDistance += distance;
   });

@@ -74,15 +74,14 @@ export const getRunsPerformedYesterday = (runs: RunData[]) => {
   const startOfYesterdayTimestamp = Math.floor(
     startOfYesterday.getTime() / 1000
   ); // Convert to seconds
-  const endOfYesterdayTimestamp = Math.floor(startOfToday.getTime() / 1000); // Convert to seconds
+  const startOfTodayTimestamp = Math.floor(startOfToday.getTime() / 1000); // Convert to seconds
 
   // Filter the runDataArray to get the runs performed yesterday
   const runsYesterday = runs.filter((runData) => {
     return (
       runData.date >= startOfYesterdayTimestamp &&
-      runData.date < endOfYesterdayTimestamp
+      runData.date < startOfTodayTimestamp
     );
   });
-
   return runsYesterday;
 };
