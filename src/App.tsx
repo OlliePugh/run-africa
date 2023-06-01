@@ -6,7 +6,7 @@ import data from "./all_runs.json";
 import Run, { RunData } from "./molecules/run";
 import { useState } from "react";
 import InfoPanel from "./molecules/info_panel";
-
+import { Analytics } from "@vercel/analytics/react";
 // @ts-ignore
 const sortedData = data.sort((a, b) => b.date - a.date);
 
@@ -21,6 +21,7 @@ function App() {
 
   return (
     <>
+      <Analytics />
       <InfoPanel
         allRuns={sortedData}
         selectedRun={openMarker}
