@@ -1,7 +1,7 @@
 import { LatLngTuple } from "leaflet";
-import { Marker, Polyline, Popup } from "react-leaflet";
+import { Marker, Polyline } from "react-leaflet";
 
-interface Run {
+export interface RunData {
   date: number;
   distance: string;
   moving_time: string;
@@ -14,7 +14,12 @@ interface Run {
   path: number[][][];
 }
 
-const Run = ({ run }: { run: Run }) => {
+interface RunProps {
+  run: RunData;
+  onClick: (runData: RunData) => void;
+}
+
+const Run = ({ run, onClick }: RunProps) => {
   return (
     <>
       <Polyline positions={run.path[0] as LatLngTuple[]} />
@@ -24,8 +29,8 @@ const Run = ({ run }: { run: Run }) => {
           run.path[0][run.path[0].length - 1][1],
         ]}
         eventHandlers={{
-          click: (e: any) => {
-            console.log("marker clicked", e);
+          click: (_) => {
+            onClick(run);
           },
         }}
       ></Marker>

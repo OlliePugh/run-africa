@@ -2,11 +2,10 @@ import "./App.css";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { MapContainer, TileLayer } from "react-leaflet";
-import { LatLngTuple } from "leaflet";
 import data from "./all_runs.json";
-import Run from "./molecules/run";
-
-// delete L.Icon.Default.prototype._getIconUrl;
+import Run, { RunData } from "./molecules/run";
+import { useState } from "react";
+import InfoPanel from "./molecules/info_panel";
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
@@ -15,28 +14,34 @@ L.Icon.Default.mergeOptions({
 });
 
 function App() {
-  const position = [51.505, -0.09] as LatLngTuple;
+  const [openMarker, setOpenMarker] = useState<RunData | undefined>();
+
   return (
-    <MapContainer
-      className="full-height-map"
-      center={[10, 30]}
-      zoom={3}
-      minZoom={3}
-      maxZoom={18}
-      maxBounds={[
-        [-85.06, -180],
-        [85.06, 180],
-      ]}
-      scrollWheelZoom={true}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {data.map((item) => (
-        <Run run={item} />
-      ))}
-    </MapContainer>
+    <>
+      <InfoPanel run={openMarker} onClose={() => setOpenMarker(undefined)} />
+      <MapContainer
+        className="full-height-map z-10"
+        center={[10, 30]}
+        zoom={3}
+        minZoom={3}
+        maxZoom={18}
+        maxBounds={[
+          [-85.06, -180],
+          [85.06, 180],
+        ]}
+        scrollWheelZoom={true}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {/* I have no idea what TypeScripts issue is here (guessing just JSON import funkiness) */}
+        {/* @ts-ignore */}
+        {data.map((item) => (
+          <Run key={item.url} run={item} onClick={setOpenMarker} />
+        ))}
+      </MapContainer>
+    </>
   );
 }
 
