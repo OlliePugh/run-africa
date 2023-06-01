@@ -1,9 +1,10 @@
 import "./App.css";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { MapContainer, Marker, TileLayer, Polyline } from "react-leaflet";
+import { MapContainer, TileLayer } from "react-leaflet";
 import { LatLngTuple } from "leaflet";
-import data from "./converted_gpx.json";
+import data from "./all_runs.json";
+import Run from "./molecules/run";
 
 // delete L.Icon.Default.prototype._getIconUrl;
 
@@ -32,21 +33,9 @@ function App() {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {/* <Popup>
-        A pretty CSS3 popup. <br /> Easily customizable.
-      </Popup> */}
-      {data.map((item) => {
-        return (
-          <>
-            <Polyline
-              positions={item.map((coords: number[]) => [coords[1], coords[0]])}
-            />
-            <Marker
-              position={[item[item.length - 1][1], item[item.length - 1][0]]}
-            />
-          </>
-        );
-      })}
+      {data.map((item) => (
+        <Run run={item} />
+      ))}
     </MapContainer>
   );
 }

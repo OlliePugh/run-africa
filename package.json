@@ -2,7 +2,7 @@
   "name": "run-africa",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://olliepugh.github.io/run-africa",
+  "homepage": ".",
   "dependencies": {
     "@mapbox/polyline": "^1.2.0",
     "@mapbox/togeojson": "^0.16.0",
