@@ -21,7 +21,11 @@ function App() {
 
   return (
     <>
-      <InfoPanel run={openMarker} onClose={() => setOpenMarker(undefined)} />
+      <InfoPanel
+        allRuns={sortedData}
+        selectedRun={openMarker}
+        onClose={() => setOpenMarker(undefined)}
+      />
       <MapContainer
         className="full-height-map z-10"
         center={sortedData[0].path[0][0] as LatLngTuple}

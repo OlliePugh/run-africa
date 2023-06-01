@@ -1,14 +1,43 @@
+import { useMemo } from "react";
 import RunStat from "../atom/run_stat";
-import { daysSinceStart } from "../helpers/date";
+import { daysSinceStart, getRunsPerformedYesterday } from "../helpers/date";
+import {
+  approxTotalDistance,
+  calculateTotalDistance,
+  estimateDaysLeft,
+} from "../helpers/distance_calculator";
 import { RunData } from "./run";
 import RunPopup from "./run_popup";
 
 interface RunPopupProps {
-  run?: RunData;
+  allRuns: RunData[];
+  selectedRun?: RunData;
   onClose: () => void;
 }
 
-const InfoPanel = ({ run, onClose }: RunPopupProps) => {
+const InfoPanel = ({ selectedRun, onClose, allRuns }: RunPopupProps) => {
+  const totalDistance = useMemo(
+    () => Math.round(calculateTotalDistance(allRuns)),
+    [allRuns]
+  );
+
+  const distanceYesterday = useMemo(() => {
+    const runsYesterday = getRunsPerformedYesterday(allRuns);
+    return Math.round(calculateTotalDistance(runsYesterday));
+  }, [allRuns]);
+
+  const daysLeft = useMemo(() => {
+    return estimateDaysLeft(allRuns, totalDistance);
+  }, [allRuns, totalDistance]);
+
+  const caloriesBurnt = useMemo(() => {
+    return allRuns.reduce(
+      (accumulator, currentValue) =>
+        accumulator + parseInt(currentValue.calories.replaceAll(",", "")),
+      0
+    );
+  }, [allRuns]);
+
   return (
     <div className="absolute w-full bottom-0 z-50 flex flex-col-reverse sm:bottom-auto sm:top-32 sm:right-0 sm:flex-col sm:w-auto">
       <div className="box-border sm:pr-5 ">
@@ -59,16 +88,29 @@ const InfoPanel = ({ run, onClose }: RunPopupProps) => {
           <div
             className={`transition-all bg-white rounded-sm sm:mt-2 sm:drop-shadow-2xl p-4`}
           >
-            <RunStat title="Yesterdays Distance" data={"60 km"} />
+            <RunStat
+              title="Yesterdays Distance"
+              data={`${distanceYesterday} km`}
+            />
             <hr />
-            <RunStat title="Total Distance" data={"1966 km"} />
+            <RunStat title="Total Distance" data={`${totalDistance} km`} />
             <hr />
-            <RunStat title="Est. Distance Remaining" data={"13034 km"} />
+            <RunStat
+              title="Est. Distance Remaining"
+              data={`${approxTotalDistance - totalDistance}km`}
+            />
+            <hr />
+            <RunStat title="Est. Days Remaining" data={daysLeft.toString()} />
+            <hr />
+            <RunStat
+              title="Total Calories Burnt"
+              data={caloriesBurnt.toString()}
+            />
           </div>
         </div>
       </div>
       <div className="overflow-hidden sm:pr-5">
-        <RunPopup run={run} onClose={onClose} />
+        <RunPopup run={selectedRun} onClose={onClose} />
       </div>
     </div>
   );

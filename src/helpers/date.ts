@@ -1,3 +1,5 @@
+import { RunData } from "../molecules/run";
+
 export const formatEpochToString = (epoch: number) => {
   const date = new Date(epoch * 1000); // Convert seconds to milliseconds
   const daysOfWeek = [
@@ -56,4 +58,31 @@ export const daysSinceStart = () => {
 
   // Convert the time difference from milliseconds to days
   return Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+};
+
+export const getRunsPerformedYesterday = (runs: RunData[]) => {
+  // Get the timestamp for yesterday (start and end)
+  const now = new Date();
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
+  const startOfYesterday = new Date(startOfToday);
+  startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+
+  const startOfYesterdayTimestamp = Math.floor(
+    startOfYesterday.getTime() / 1000
+  ); // Convert to seconds
+  const endOfYesterdayTimestamp = Math.floor(startOfToday.getTime() / 1000); // Convert to seconds
+
+  // Filter the runDataArray to get the runs performed yesterday
+  const runsYesterday = runs.filter((runData) => {
+    return (
+      runData.date >= startOfYesterdayTimestamp &&
+      runData.date < endOfYesterdayTimestamp
+    );
+  });
+
+  return runsYesterday;
 };
