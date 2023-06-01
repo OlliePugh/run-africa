@@ -11,7 +11,7 @@ export interface RunData {
   elapsed_time: string;
   url: string;
   run_name: string;
-  path: number[][][];
+  path: number[][];
 }
 
 interface RunProps {
@@ -22,11 +22,11 @@ interface RunProps {
 const Run = ({ run, onClick }: RunProps) => {
   return (
     <>
-      <Polyline positions={run.path[0] as LatLngTuple[]} />
+      <Polyline positions={run.path as LatLngTuple[]} />
       <Marker
         position={[
-          run.path[0][run.path[0].length - 1][0],
-          run.path[0][run.path[0].length - 1][1],
+          run.path[run.path.length - 1][0],
+          run.path[run.path.length - 1][1],
         ]}
         eventHandlers={{
           click: (_) => {

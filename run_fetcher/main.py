@@ -1,4 +1,3 @@
-
 from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -11,10 +10,16 @@ from selenium.webdriver.chrome.service import Service
 import requests
 import gpxpy
 import json
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Get environment variables
 EMAIL = os.getenv('STRAVA_EMAIL')
 PASSWORD = os.environ.get('STRAVA_PASSWORD')
+SHOULD_LOG_IN = True
+
 
 def data_to_gpx_to_json(gpx_string):
     gpx = gpxpy.parse(gpx_string)
@@ -31,6 +36,7 @@ def data_to_gpx_to_json(gpx_string):
 
     return gpx_data[0]  # returns array
 
+
 opts = ChromeOptions()
 opts.add_argument("--window-size=1024,720")
 
@@ -41,21 +47,24 @@ try:
     cookies = pickle.load(open("cookies.pkl", "rb"))
     for cookie in cookies:
         driver.add_cookie(cookie)
+# just a nice to have doesn't matter if it fails (i.e. fail doesn't exist)
 except:
     pass
 
-driver.get("https://www.strava.com/login")
-driver.find_element(By.ID, "email").send_keys(EMAIL)
-driver.find_element(By.ID, "password").send_keys(PASSWORD)
-driver.find_element(By.ID, "login-button").click()
-pickle.dump(driver.get_cookies(), open("cookies.pkl", "wb"))
+if (SHOULD_LOG_IN):
+    driver.get("https://www.strava.com/login")
+    driver.find_element(By.ID, "email").send_keys(EMAIL)
+    driver.find_element(By.ID, "password").send_keys(PASSWORD)
+    driver.find_element(By.ID, "login-button").click()
+    pickle.dump(driver.get_cookies(), open(
+        "cookies.pkl", "wb"))  # save the auth tokens
 
 
 def scrape_run(driver, link):
-    
+
     data = {}
     driver.get(link)
-    
+
     date_string = driver.find_element(By.XPATH, "//time").text
     date_format = "%A, %d %B %Y"
 
@@ -64,7 +73,8 @@ def scrape_run(driver, link):
     run_name = driver.find_element(By.CLASS_NAME, "activity-name").text
 
     # Convert cookies to the required format for the requests library
-    cookies_dict = {cookie['name']: cookie['value'] for cookie in driver.get_cookies()}
+    cookies_dict = {cookie['name']: cookie['value']
+                    for cookie in driver.get_cookies()}
 
     # Make a request to the endpoint using the cookies
     url = link + "/export_gpx"  # Replace with your endpoint URL
@@ -87,12 +97,12 @@ def scrape_run(driver, link):
     return data
 
 
-
 # get the runs
-first_run = datetime(2023, 4, 22)  # date of the first run
+FIRST_RUN = datetime(2023, 4, 22)  # date of the first run
 
 # Start with the current date
-target_month = datetime(2023, 5, 22)#datetime.today()
+target_month = datetime.today().replace(day=22)  # kinda hacky fix
+
 
 def map_a_tags(item):
     try:
@@ -100,51 +110,79 @@ def map_a_tags(item):
     except:
         return None
 
-all_runs = []
 
-while target_month >= first_run:
+all_runs = []
+new_runs = []
+
+new_link_found = False
+
+while target_month >= FIRST_RUN:
     # # Format the target month as desired (YYYYMM)
     formatted_month = target_month.strftime("%Y%m")
-    driver.get("https://www.strava.com/athletes/22704023#interval?interval="+formatted_month+"&interval_type=month&chart_type=miles&year_offset=0")
-    
-    page_height = driver.execute_script("return document.body.scrollHeight")
-
-    # Define the duration in seconds for scrolling
-    scroll_duration = 2
-
-    # Start time
-    start_time = time.time()
+    driver.get("https://www.strava.com/athletes/22704023#interval?interval=" +
+               formatted_month+"&interval_type=month&chart_type=miles&year_offset=0")
 
     # Scroll continuously for the specified duration
-    while time.time() - start_time < scroll_duration:
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    page_height = driver.execute_script("return document.body.scrollHeight")
+    scroll_duration = 2
+    start_time = time.time()
+    while time.time() - start_time < scroll_duration:  # scroll down to load all
+        driver.execute_script(
+            "window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(1)  # Wait for 1 second between scrolls
 
-    # # Re-locate the links each time
-    links = driver.find_elements(By.XPATH, "//div[@class='feed-ui']//a[starts-with(@href, '/activities/')]")
-    
+    # Find all links on the page
+    links = driver.find_elements(
+        By.XPATH, "//div[@class='feed-ui']//a[starts-with(@href, '/activities/')]")
+
     links = list(map(map_a_tags, links))
     links = list(set(links))
     # Remove duplicates by converting to a set and back to a list
-    
+
     for link in links:
         if not link:  # if is empty
-            continue
-        
+            continue  # go to the next link
+
+        activity_id = link.split("/")[-1]
+
+        if (os.path.exists(f"runs/{activity_id}.json")):
+            print("skipping run as already downloaded " + link)
+            continue  # ignore this link as we have already download it
+
         try:
             result = scrape_run(driver, link)
-            if (result["date"] >= first_run):
+            if (result["date"] >= FIRST_RUN.timestamp()):
                 all_runs.append(result)
-                with open("runs/{}-{}.json".format(result["run_name"], result["calories"]).replace("\\"," "), "w") as file:
+                file_name = f"runs/{activity_id}.json"
+                new_runs.append(file_name)
+                with open(file_name, "w") as file:
                     json.dump(result, file)
+                new_link_found = True
+            print("successfully scraped " + link)
         except:  # if something goes wrong just ignore it
-            print("failed to scrape " +link)
+            print("failed to scrape " + link)
             pass
-    
 
-    print("https://www.strava.com/athletes/22704023#interval?interval="+formatted_month+"&interval_type=month&chart_type=miles&year_offset=0")
+    print("https://www.strava.com/athletes/22704023#interval?interval=" +
+          formatted_month+"&interval_type=month&chart_type=miles&year_offset=0")
+
+    if not new_link_found:
+        print("no new runs found on page - exiting early")
+        break
+
     target_month -= relativedelta(months=1)
 
+
+# Iterate over each file in the folder
+for filename in os.listdir("runs"):
+    # if its in new runs then we dont need to read the file again
+    if filename.endswith(".json") and filename not in new_runs:
+        file_path = os.path.join("runs", filename)
+        with open(file_path) as file:
+            # Load the JSON data from the file
+            json_data = json.load(file)
+            # Add the JSON data to the all_runs array
+            all_runs.append(json_data)
 
 with open("all_runs.json", "w") as file:
     json.dump(all_runs, file)

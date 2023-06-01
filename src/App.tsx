@@ -5,8 +5,7 @@ import { MapContainer, TileLayer } from "react-leaflet";
 import data from "./all_runs.json";
 import Run, { RunData } from "./molecules/run";
 import { useState } from "react";
-import InfoPanel from "./molecules/info_panel";
-import { Analytics } from "@vercel/analytics/react";
+import InfoPanel from "./molecules/info-panel";
 // @ts-ignore
 const sortedData = data.sort((a, b) => b.date - a.date);
 
@@ -18,10 +17,9 @@ L.Icon.Default.mergeOptions({
 
 function App() {
   const [openMarker, setOpenMarker] = useState<RunData | undefined>();
-
+  console.log(sortedData[0]);
   return (
     <>
-      <Analytics />
       <InfoPanel
         allRuns={sortedData}
         selectedRun={openMarker}
@@ -29,7 +27,7 @@ function App() {
       />
       <MapContainer
         className="full-height-map z-10"
-        center={sortedData[0].path[0][0] as LatLngTuple}
+        center={sortedData[0].path[0] as LatLngTuple}
         zoom={8}
         minZoom={3}
         maxZoom={18}
