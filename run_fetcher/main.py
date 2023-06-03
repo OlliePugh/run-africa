@@ -184,7 +184,7 @@ for filename in os.listdir("runs"):
             # Add the JSON data to the all_runs array
             all_runs.append(json_data)
 
-with open("all_runs.json", "w") as file:
+with open("../src/all_runs.json", "w") as file:
     json.dump(all_runs, file)
 
 driver.close()
