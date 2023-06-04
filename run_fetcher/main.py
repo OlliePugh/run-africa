@@ -154,7 +154,7 @@ while target_month >= FIRST_RUN:
             if (result["date"] >= FIRST_RUN.timestamp()):
                 all_runs.append(result)
                 file_name = f"runs/{activity_id}.json"
-                new_runs.append(file_name)
+                new_runs.append(f"{activity_id}.json")
                 with open(file_name, "w") as file:
                     json.dump(result, file)
                 new_link_found = True
